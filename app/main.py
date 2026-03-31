@@ -20,7 +20,7 @@ app = FastAPI()
 
 # Allow CORS
 origins = [
-    "http://localhost:5173",  # Vite frontend
+    "https://customer-app-frontend-tau.vercel.app/",  # Vite frontend
     # You can add other origins later if needed
 ]
 
