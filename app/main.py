@@ -28,18 +28,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Explicit preflight handler that injects headers directly
+app.include_router(graphql_app, prefix="/graphql")
+
+# This must come AFTER include_router so FastAPI registers it last
+# and it takes priority over Strawberry's internal route handling
 @app.options("/graphql")
 async def graphql_preflight(request: Request):
     return JSONResponse(
-        content={},
+        content="OK",
         status_code=200,
         headers={
             "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
-            "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
             "Access-Control-Allow-Headers": "*",
             "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Max-Age": "3600",
         },
     )
-
-app.include_router(graphql_app, prefix="/graphql")
