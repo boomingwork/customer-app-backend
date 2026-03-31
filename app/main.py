@@ -27,10 +27,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ OPTIONS route to handle preflight synchronously
-@app.api_route("/graphql", methods=["OPTIONS"])
-def graphql_preflight():
-    return Response(status_code=200)
-
 # ✅ Include GraphQL router
 app.include_router(graphql_app, prefix="/graphql")
