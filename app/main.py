@@ -16,23 +16,10 @@ def get_context(db: Session = Depends(get_db)):
 
 graphql_app = GraphQLRouter(schema, context_getter=get_context)
 
-app = FastAPI()
-
 ALLOWED_ORIGIN = "https://customer-app-frontend-tau.vercel.app"
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[ALLOWED_ORIGIN],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.include_router(graphql_app, prefix="/graphql")
-
-# This must come AFTER include_router so FastAPI registers it last
-# and it takes priority over Strawberry's internal route handling
-@app.options("/graphql")
+# ✅ Add OPTIONS directly onto the GraphQL router itself, before mounting
+@graphql_app.options("/")
 async def graphql_preflight(request: Request):
     return JSONResponse(
         content="OK",
@@ -45,3 +32,16 @@ async def graphql_preflight(request: Request):
             "Access-Control-Max-Age": "3600",
         },
     )
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[ALLOWED_ORIGIN],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ✅ Include AFTER the OPTIONS route is registered on graphql_app
+app.include_router(graphql_app, prefix="/graphql")
