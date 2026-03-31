@@ -33,4 +33,4 @@ app.add_middleware(
 )
 
 # ✅ Include router
-app.include_router(graphql_app, prefix="/graphql")
+app.include_router(graphql_app)
