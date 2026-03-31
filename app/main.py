@@ -14,22 +14,8 @@ schema = strawberry.Schema(query=Query, mutation=Mutation)
 def get_context(db: Session = Depends(get_db)):
     return {"db": db}
 
-graphql_app = GraphQLRouter(schema, context_getter=get_context)
+graphql_app = GraphQLRouter(schema, context_getter=get_context, allow_origins=["https://customer-app-frontend-5ajwvtv60-boomingwork-9487s-projects.vercel.app"])  # Allow all origins for GraphQL
 
 app = FastAPI()
-
-# Allow CORS
-origins = [
-    "https://customer-app-frontend-5ajwvtv60-boomingwork-9487s-projects.vercel.app",  # Vite frontend
-    # You can add other origins later if needed
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],  # GET, POST, PUT, DELETE, etc.
-    allow_headers=["*"],
-)
 
 app.include_router(graphql_app, prefix="/graphql")
