@@ -1,5 +1,6 @@
-from fastapi import FastAPI, Response, Depends
+from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from strawberry.fastapi import GraphQLRouter
 import strawberry
 from sqlalchemy.orm import Session
@@ -8,7 +9,6 @@ from app.db.session import get_db
 from app.graphql.query import Query
 from app.graphql.mutation import Mutation
 
-# --- GraphQL schema ---
 schema = strawberry.Schema(query=Query, mutation=Mutation)
 
 def get_context(db: Session = Depends(get_db)):
@@ -18,14 +18,28 @@ graphql_app = GraphQLRouter(schema, context_getter=get_context)
 
 app = FastAPI()
 
-# ✅ CORS middleware allows your Vercel frontend
+ALLOWED_ORIGIN = "https://customer-app-frontend-tau.vercel.app"
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://customer-app-frontend-tau.vercel.app"],  # production frontend
+    allow_origins=[ALLOWED_ORIGIN],
     allow_credentials=True,
-    allow_methods=["*"],  # includes OPTIONS, POST, GET
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ✅ Include GraphQL router
+# Explicit preflight handler that injects headers directly
+@app.options("/graphql")
+async def graphql_preflight(request: Request):
+    return JSONResponse(
+        content={},
+        status_code=200,
+        headers={
+            "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
+            "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Credentials": "true",
+        },
+    )
+
 app.include_router(graphql_app, prefix="/graphql")
