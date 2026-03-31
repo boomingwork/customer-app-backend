@@ -18,7 +18,7 @@ graphql_app = GraphQLRouter(
     schema,
     context_getter=get_context,
     allow_origin=[
-        "https://customer-app-frontend-5ajwvtv60-boomingwork-9487s-projects.vercel.app"
+        "*"
     ],
 )
 
