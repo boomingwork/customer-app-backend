@@ -22,7 +22,9 @@ app = FastAPI()
 origins = [
     "http://localhost:5173",
     "https://customer-app-frontend-tau.vercel.app/",
-    "customer-app-frontend-boomingwork-9487s-projects.vercel.app",
+    "https://customer-app-frontend-tau.vercel.app",
+    "https://customer-app-frontend-boomingwork-9487s-projects.vercel.app",
+    "https://customer-app-frontend-boomingwork-9487s-projects.vercel.app/",
     "https://customer-app-frontend-git-master-boomingwork-9487s-projects.vercel.app/"
     # You can add other origins later if needed
 ]
