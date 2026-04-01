@@ -1,13 +1,13 @@
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from strawberry.fastapi import GraphQLRouter
-import strawberry
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.graphql.query import Query
 from app.graphql.mutation import Mutation
+
+import strawberry
 
 schema = strawberry.Schema(query=Query, mutation=Mutation)
 
@@ -16,32 +16,23 @@ def get_context(db: Session = Depends(get_db)):
 
 graphql_app = GraphQLRouter(schema, context_getter=get_context)
 
-ALLOWED_ORIGIN = "https://customer-app-frontend-tau.vercel.app"
-
-# ✅ Add OPTIONS directly onto the GraphQL router itself, before mounting
-@graphql_app.options("/")
-async def graphql_preflight(request: Request):
-    return JSONResponse(
-        content="OK",
-        status_code=200,
-        headers={
-            "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
-            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-            "Access-Control-Allow-Headers": "*",
-            "Access-Control-Allow-Credentials": "true",
-            "Access-Control-Max-Age": "3600",
-        },
-    )
-
 app = FastAPI()
+
+# Allow CORS
+origins = [
+    "http://localhost:5173",
+    "https://customer-app-frontend-tau.vercel.app/",
+    "customer-app-frontend-boomingwork-9487s-projects.vercel.app",
+    "https://customer-app-frontend-git-master-boomingwork-9487s-projects.vercel.app/"
+    # You can add other origins later if needed
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[ALLOWED_ORIGIN],
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["*"],  # GET, POST, PUT, DELETE, etc.
     allow_headers=["*"],
 )
 
-# ✅ Include AFTER the OPTIONS route is registered on graphql_app
 app.include_router(graphql_app, prefix="/graphql")
